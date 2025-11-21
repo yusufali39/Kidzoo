@@ -257,7 +257,7 @@ $(document).ready(function () {
   <body>
     <div class="container mt-1">
       <h3 class="shop-title text-center mb-0" id="savePdfButton">
-                <img src="IMG_20250429_083027.jpg" alt="logo" style="width: 320px; height: 70px; display: block; margin: 0 auto;" />
+                <img src="IMG_20251121_122027.jpg" alt="logo" style="width: 320px; height: 70px; display: block; margin: 0 auto;" />
       </h3>
       
 
@@ -436,3 +436,4 @@ setTimeout(() => {
         localStorage.setItem("amountPaid", amountPaid);
     }
 }); 
+
