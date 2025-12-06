@@ -200,56 +200,76 @@ $(document).ready(function () {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
  
-     <style>
-           /* Import VT323 font */
-  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-  
-      /* Print style for an 80mm receipt */
-      @media print {
-        @page {
-          size: 100mm auto;
-          margin: 0;
-        }
-        body { 
-      font-family: 'VT323', monospace !important; 
-      margin: 0; 
-      font-size: 18px;
-    }
-    body, .container, .table, p, h5, th, td { 
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<style> 
+  /* Apply VT323 globally */
+  * {
     font-family: 'VT323', monospace !important;
   }
-      }
-      /* On-screen container width */
-      .container {
-        width: 100mm;
-        margin: 0 auto;
-      }
-      .shop-title {
-      font-size: 22px !important; 
-      font-weight: 900 !important;
-      line-height: 0.5 !important;
-      margin: 2mm 0 !important;
-      text-transform: uppercase;
+  
+  body {
+    font-family: 'VT323', monospace !important;
+    font-size: 20px;
+    margin: 0;
   }
-      .shop-address {
-      line-height: 1.5 !important;
-      margin: 2mm 0 !important;
-      text-transform: uppercase;
-      }
-      hr {
-      margin: 0.5mm 0 !important;
-      }
-      .item-list{
-      font-weight: 700 !important;
-      line-height: 1.0 !important;
-      margin: 1mm 0 !important;
-      text-transform: uppercase;
-      }
-      .table{
-      line-height: 0.5 !important;
-      margin-bottom: 0.3mm 0 !important;
-      }
-    </style>
+  
+  /* Print style for 80mm receipt */ 
+  @media print { 
+    @page { 
+      size: 100mm auto; 
+      margin: 0; 
+    } 
+    body { 
+      font-family: 'VT323', monospace !important; 
+      margin: 0; 
+      font-size: 20px;
+    } 
+  } 
+  
+  .container { 
+    width: 100mm; 
+    margin: 0 auto; 
+  } 
+  
+  .shop-title { 
+    font-size: 24px !important;  
+    font-weight: 900 !important; 
+    line-height: 0.5 !important; 
+    margin: 2mm 0 !important; 
+    text-transform: uppercase; 
+  } 
+  
+  .shop-address { 
+    line-height: 1.5 !important; 
+    margin: 2mm 0 !important; 
+    text-transform: uppercase; 
+  } 
+  
+  hr { 
+    margin: 0.5mm 0 !important; 
+  } 
+  
+  .item-list {
+    font-weight: 700 !important; 
+    line-height: 1.0 !important; 
+    margin: 1mm 0 !important; 
+    text-transform: uppercase; 
+  } 
+  
+  .table {
+    line-height: 0.5 !important; 
+    margin-bottom: 0.3mm !important; 
+  } 
+  
+  th, td {
+    font-size: 18px !important;
+  }
+  
+  p, h5 {
+    font-size: 20px !important;
+  }
+</style>
     
     <!-- html2pdf script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js" defer></script>
@@ -436,6 +456,7 @@ setTimeout(() => {
         localStorage.setItem("amountPaid", amountPaid);
     }
 }); 
+
 
 
 
