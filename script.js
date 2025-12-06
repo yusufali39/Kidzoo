@@ -201,23 +201,23 @@ $(document).ready(function () {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
  
      <style>
-           @font-face {
-      font-family: 'Arial Narrow';
-      src: local('Arial Narrow'), local('ArialNarrow'),
-           url('https://fonts.cdnfonts.com/s/19849/ARIALN.woff') format('woff');
-      font-weight: normal;
-      font-style: normal;
-    }
+           /* Import VT323 font */
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  
       /* Print style for an 80mm receipt */
       @media print {
         @page {
           size: 100mm auto;
           margin: 0;
         }
-        body {
-        font-family: 'Arial Narrow', 'Nimbus Sans Narrow', 'Franklin Gothic Medium', sans-serif !important;
-          margin: 0;
-        }
+        body { 
+      font-family: 'VT323', monospace !important; 
+      margin: 0; 
+      font-size: 18px;
+    }
+    body, .container, .table, p, h5, th, td { 
+    font-family: 'VT323', monospace !important;
+  }
       }
       /* On-screen container width */
       .container {
@@ -436,5 +436,6 @@ setTimeout(() => {
         localStorage.setItem("amountPaid", amountPaid);
     }
 }); 
+
 
 
