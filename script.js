@@ -46,7 +46,7 @@ $(document).ready(function () {
     var itemQty = parseInt($("#item-qty").val());
 
     if (
-        customerName.trim() !== "" &&
+        customerName. trim() !== "" &&
         itemName.trim() !== "" &&
         itemPrice.trim() !== ""
     ) {
@@ -62,14 +62,14 @@ $(document).ready(function () {
             "<tr><td>" +
             item.name +
             "</td><td>₹" +
-            item.price.toFixed(2) +
+            item.price. toFixed(2) +
             "</td><td>" +
             item.qty +
             "</td><td>₹" +
             (item.price * item.qty).toFixed(2) +
             '</td><td><button class= "btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button></td></tr>'
         );
-        localStorage.setItem("items", JSON.stringify(items)); 
+        localStorage.setItem("items", JSON. stringify(items)); 
         renderCart();
         updateTotalCost();
         updateTotalQty();
@@ -101,13 +101,13 @@ $(document).ready(function () {
       items.splice(index, 1);
 
       row.remove();
-      localStorage.setItem("items", JSON.stringify(items));
+      localStorage.setItem("items", JSON. stringify(items));
       renderCart();
       updateTotalCost();
       updateTotalQty();
       updateTotalAmt(); 
 
-      console.log(`Removed item: ${itemTotal} subtracted from total.`);
+      console.log(`Removed item: ${itemTotal} subtracted from total. `);
     }
   }
 
@@ -151,7 +151,7 @@ $(document).ready(function () {
       totalAmt += item.price * item.qty;
     });
     totalAmt += prevDues;
-    $("#total-amount").text("TOTAL : ₹" + totalAmt.toFixed(2));
+    $("#total-amount").text("TOTAL :  ₹" + totalAmt.toFixed(2));
     updateCurrentDue();
   }
   function updateCurrentDue() {
@@ -170,10 +170,10 @@ $(document).ready(function () {
 
   var currentTime = new Date();
   var hours = currentTime.getHours();
-  var minutes = currentTime.getMinutes();
-  var ampm = hours >= 12 ? "PM" : "AM";
+  var minutes = currentTime. getMinutes();
+  var ampm = hours >= 12 ?  "PM" : "AM";
   hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
+  hours = hours ? hours :  12; // the hour '0' should be '12'
   minutes = minutes < 10 ? "0" + minutes : minutes;
   var timeStr = hours + ":" + minutes + " " + ampm;
 
@@ -185,8 +185,8 @@ $(document).ready(function () {
 
     var currentTime = new Date();
     var hours = currentTime.getHours();
-    var minutes = currentTime.getMinutes();
-    var ampm = hours >= 12 ? "PM" : "AM";
+    var minutes = currentTime. getMinutes();
+    var ampm = hours >= 12 ?  "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12; // Convert 0 to 12 for 12-hour format
     minutes = minutes < 10 ? "0" + minutes : minutes; // Add leading zero if needed
@@ -199,19 +199,29 @@ $(document).ready(function () {
     <title>Invoice</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
- 
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style> 
-  /* Apply VT323 globally */
+  @font-face {
+    font-family: "OCR-B";
+    src: url("https://fonts.cdnjs.com/ajax/libs/OCR-B/1.0/OCR-B.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  /* Apply OCR-B globally */
   * {
-    font-family: 'VT323', monospace !important;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+    font-weight: normal ! important;
+    letter-spacing: 0.5px;
+    font-style: normal !important;
   }
   
   body {
-    font-family: 'VT323', monospace !important;
-    font-size: 20px;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+    font-size: 16px;
     margin: 0;
+    background:  white;
+    font-weight: normal ! important;
   }
   
   /* Print style for 80mm receipt */ 
@@ -221,53 +231,89 @@ $(document).ready(function () {
       margin: 0; 
     } 
     body { 
-      font-family: 'VT323', monospace !important; 
+      font-family: "OCR-B", "FreeMono", "Courier New", monospace !important; 
       margin: 0; 
-      font-size: 20px;
+      font-size: 16px;
+      font-weight: normal !important;
     } 
   } 
   
   .container { 
     width: 100mm; 
-    margin: 0 auto; 
+    margin: 0 auto;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
   } 
   
   .shop-title { 
-    font-size: 24px !important;  
-    font-weight: 900 !important; 
+    font-size: 18px ! important;  
+    font-weight: normal ! important; 
     line-height: 0.5 !important; 
     margin: 2mm 0 !important; 
-    text-transform: uppercase; 
+    text-transform: uppercase;
+    letter-spacing: 1px;
   } 
   
   .shop-address { 
     line-height: 1.5 !important; 
-    margin: 2mm 0 !important; 
-    text-transform: uppercase; 
+    margin:  2mm 0 !important; 
+    text-transform: uppercase;
+    font-size: 14px !important;
+    letter-spacing: 0.5px;
   } 
   
   hr { 
-    margin: 0.5mm 0 !important; 
+    margin: 0. 5mm 0 !important;
+    border: none !important;
+    border-top: 1px dotted #000 !important;
   } 
   
   .item-list {
-    font-weight: 700 !important; 
+    font-weight: normal !important; 
     line-height: 1.0 !important; 
     margin: 1mm 0 !important; 
-    text-transform: uppercase; 
+    text-transform: uppercase;
+    font-size: 16px !important;
+    letter-spacing: 0.5px;
   } 
   
   .table {
-    line-height: 0.5 !important; 
-    margin-bottom: 0.3mm !important; 
+    line-height: 0.8 !important; 
+    margin-bottom: 0.3mm !important;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
   } 
   
   th, td {
-    font-size: 18px !important;
+    font-size: 16px !important;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+    font-weight: normal !important;
+    letter-spacing: 0.5px;
+    padding: 2px 4px;
   }
   
   p, h5 {
-    font-size: 20px !important;
+    font-size: 16px !important;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+    font-weight: normal !important;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .billing {
+    font-size: 16px !important;
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+  }
+
+  footer {
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+  }
+
+  .text-center {
+    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
+  }
+
+  .text-right {
+    font-family:  "OCR-B", "FreeMono", "Courier New", monospace !important;
   }
 </style>
     
@@ -281,22 +327,22 @@ $(document).ready(function () {
       </h3>
       
 
-      <hr class="shop-hr" style="border: none; border-top: 1px dotted #000; width: 100%;" />
+      <hr class="shop-hr" style="border:  none; border-top: 1px dotted #000; width: 100%;" />
 
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <p class="mb-0"><strong>BILL TO:</strong> ${customerName}</p>
-        <p class="mb-0"><strong>No.:</strong> ${customerNumber}</p>
+        <p class="mb-0"><strong>NO. :</strong> ${customerNumber}</p>
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <p class="mb-0"><strong>DATE:</strong> ${getCurrentDate()}</p>
-        <p class="text-right mb-0"><strong>TM:</strong> ${timeStr}</p>
+        <p class="text-right mb-0"><strong>TIME:</strong> ${timeStr}</p>
       </div>
       <hr style="border: none; border-top: 1px dotted #000; width: 100%; margin-bottom: 0px;" />
 
       <table class="table">
         <thead>
           <tr>
-            <th style="text-align: left;">SN</th>
+            <th style="text-align: left;">S.N</th>
             <th style="text-align: left;">DESCRIPTION</th>
             <th style="text-align: right;">QTY</th>
             <th style="text-align: right;">RATE</th>
@@ -308,7 +354,7 @@ $(document).ready(function () {
 items.forEach(function (item, index) {
   invoice += `<tr>
                 <td class="item-list" style="text-align: left;">${index + 1}</td>
-                <td class="item-list" style="text-align: left;">${item.name}</td>
+                <td class="item-list" style="text-align:  left;">${item.name}</td>
                 <td class="item-list" style="text-align: right;">${item.qty}</td>
                 <td class="item-list" style="text-align: right;">₹${item.price.toFixed(2)}</td>
                 <td class="item-list" style="text-align: right;">₹${(item.price * item.qty).toFixed(2)}</td>
@@ -326,13 +372,13 @@ invoice += `
       </div>
         <hr style="border: none; border-top: 1px dotted #000; width: 100%;" />
         <h5 style="text-align: left;" class="mb-0">DUES: <span style="float: right;"> ₹${prevDues.toFixed(2)}</span></h5>
-        <h5 style="text-align: left;" class="mb-0">TOTAL AMT: <span style="float: right;"> ₹${totalAmt.toFixed(2)}</span></h5>
+        <h5 style="text-align: left;" class="mb-0">TOTAL AMT: <span style="float:  right;"> ₹${totalAmt.toFixed(2)}</span></h5>
         <h5 style="text-align: left;" class="mb-0">CASH PAID: <span style="float: right;"> ₹${amountPaid.toFixed(2)}</span></h5>
         <h5 style="text-align: left;" class="mb-0">CURR DUES: <span style="float: right;"> ₹${currentDue.toFixed(2)}</span></h5>
 
         <hr style="border: none; border-top: 1px dotted #000; width: 100%;" />
         <p id="print-button" class="text-center mb-0">THANKS FOR VISIT</p>
-        ${addStamp ? `<div class="text-center" style="margin-top:0;"><img src="Logopit_1750148360789.png" alt="Stamp" style="width:120px;" transform: rotate(-30deg); margin-top:0;"></div>` : ""}
+        ${addStamp ?  `<div class="text-center" style="margin-top: 0;"><img src="Logopit_1750148360789.png" alt="Stamp" style="width: 120px;" transform:  rotate(-30deg); margin-top: 0;"></div>` : ""}
       </footer>
     </div>
   </body>
@@ -347,8 +393,8 @@ invoice += `
       const element = document.body;
       html2pdf(element, {
     margin: 2, 
-    filename: 'invoice.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
+    filename: 'invoice. pdf',
+    image: { type: 'jpeg', quality:  0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } // Use 'a4' to fit more content
   });
@@ -371,7 +417,7 @@ invoice += `
       return;
     }
 
-// Add country code (e.g., India: 91)
+// Add country code (e.g., India:  91)
 const countryCode = "91"; // Change this to your country code
 const formattedNumber = `${countryCode}${customerNumber}`;
       
@@ -380,19 +426,19 @@ const formattedNumber = `${countryCode}${customerNumber}`;
     var currentDue = totalAmt - amountPaid;
     var totalQty = getTotalQty();
 
-const whatsappMessage = `Hi ${customerName},\n\nYour Invoice:\nTotal Qty: ${totalQty}\nTotal Amount: ₹${totalAmt.toFixed(2)}\nCurrent Due: ₹${currentDue.toFixed(2)}\n\nThank you for shopping with us!`;
+const whatsappMessage = `Hi ${customerName},\n\nYour Invoice:\nTotal Qty: ${totalQty}\nTotal Amount: ₹${totalAmt.toFixed(2)}\nCurrent Due: ₹${currentDue.toFixed(2)}\n\nThank you for shopping with us! `;
       
 
    // 1. Try WhatsApp Business first
 const businessUrl = `whatsapp-business://send?phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
-const universalUrl = `https://api.whatsapp.com/send?phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
+const universalUrl = `https://api.whatsapp.com/send? phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
 
 // Open WhatsApp Business and fallback if it fails
 const newWindow = window.open(businessUrl, "_blank");
 
 // Check if the window is still open after a short delay (indicates failure)
 setTimeout(() => {
-  if (newWindow && !newWindow.closed) {
+  if (newWindow && ! newWindow.closed) {
     newWindow.close(); // Close the blank tab
     window.open(universalUrl, "_blank"); // Fallback to universal URL
   }
@@ -402,8 +448,8 @@ setTimeout(() => {
   function getCurrentDate() {
     var currentDate = new Date();
     var dd = String(currentDate.getDate()).padStart(2, "0");
-    var mm = String(currentDate.getMonth() + 1).padStart(2, "0"); // January is 0!
-    var yyyy = currentDate.getFullYear();
+    var mm = String(currentDate.getMonth() + 1).padStart(2, "0"); // January is 0! 
+    var yyyy = currentDate. getFullYear();
 
     return dd + "/" + mm + "/" + yyyy;
   }
@@ -411,7 +457,7 @@ setTimeout(() => {
   function getTotalQty() {
     var totalQty = 0;
     items.forEach(function (item) {
-      totalQty += item.qty;
+      totalQty += item. qty;
     });
     return totalQty;
   }
@@ -443,8 +489,8 @@ setTimeout(() => {
 
         $("#customer-name, #customer-number, #prev-dues, #amount-paid, #item-name, #item-price, #item-qty").val("");
         $("#cart-table tbody").empty();
-        $("#total-cost").text("Amount: ₹0.00");
-        $("#total-amount").text("TOTAL : ₹0.00");
+        $("#total-cost").text("Amount:  ₹0.00");
+        $("#total-amount").text("TOTAL :  ₹0.00");
         $("#current-due").text("Current Due: ₹0.00");
         $("#total-qty").text("Total Qty: 0");
         
@@ -456,7 +502,3 @@ setTimeout(() => {
         localStorage.setItem("amountPaid", amountPaid);
     }
 }); 
-
-
-
-
