@@ -1,4 +1,12 @@
+/* Complete script: copy & paste into your page (replace your existing script).
+   This is a drop-in replacement that keeps cart, storage and WhatsApp features,
+   and generates a single-column (not table) professional invoice with tall/mono fonts,
+   bold/sharp rendering, and print/PDF support.
+   Requires jQuery to be loaded on the page.
+*/
+
 $(document).ready(function () {
+  // Load saved state from localStorage
   var items = JSON.parse(localStorage.getItem("items")) || [];
   var customerName = localStorage.getItem("customerName") || "";
   var customerNumber = localStorage.getItem("customerNumber") || "";
@@ -7,6 +15,7 @@ $(document).ready(function () {
 
   var addStamp = false;
 
+  // UI bindings
   $("#stamp-button").on("click", function() {
     addStamp = true;
     alert("Stamp will be added to the invoice.");
@@ -25,7 +34,7 @@ $(document).ready(function () {
   $("#clear-button").on("click", function(event) {
     event.preventDefault();
     clearAllInputs();
-});
+  });
 
   $("#item-form").on("submit", addItemToCart);
   $("#cart-table").on("click", ".btn-danger", removeItemFromCart);
@@ -38,79 +47,81 @@ $(document).ready(function () {
     $("#item-name").val(selectedItem);
   });
 
+  // Keep localStorage updated as user edits
+  $("#customer-name").on("input", function () {
+    customerName = $(this).val();
+    localStorage.setItem("customerName", customerName);
+  });
+  $("#customer-number").on("input", function () {
+    customerNumber = $(this).val();
+    localStorage.setItem("customerNumber", customerNumber);
+  });
+
+  $("#prev-dues").on("input", function () {
+    prevDues = parseFloat($(this).val()) || 0;
+    localStorage.setItem("prevDues", prevDues);
+    updateTotalAmt();
+  });
+
+  $("#amount-paid").on("input", function () {
+    amountPaid = parseFloat($(this).val()) || 0;
+    localStorage.setItem("amountPaid", amountPaid);
+    updateCurrentDue();
+  });
+
+  // Add item to cart
   function addItemToCart(event) {
     event.preventDefault();
 
     var itemName = $("#item-name").val();
     var itemPrice = $("#item-price").val();
-    var itemQty = parseInt($("#item-qty").val());
+    var itemQty = parseInt($("#item-qty").val()) || 1;
 
     if (
-        customerName. trim() !== "" &&
-        itemName.trim() !== "" &&
-        itemPrice.trim() !== ""
+        (customerName && customerName.trim() !== "") &&
+        itemName && itemName.trim() !== "" &&
+        itemPrice && itemPrice.trim() !== ""
     ) {
         var item = {
             name: itemName,
             price: parseFloat(itemPrice),
-            qty: itemQty,
+            qty: itemQty
         };
 
-
         items.push(item);
-        $("#cart-table tbody").append(
-            "<tr><td>" +
-            item.name +
-            "</td><td>₹" +
-            item.price. toFixed(2) +
-            "</td><td>" +
-            item.qty +
-            "</td><td>₹" +
-            (item.price * item.qty).toFixed(2) +
-            '</td><td><button class= "btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button></td></tr>'
-        );
-        localStorage.setItem("items", JSON. stringify(items)); 
+        localStorage.setItem("items", JSON.stringify(items));
         renderCart();
         updateTotalCost();
         updateTotalQty();
         updateTotalAmt();
-        
+
         // Clear input fields
         $("#item-name").val("");
         $("#item-price").val("");
         $("#item-qty").val("");
-
-        // Move focus back to the item name input field
         $("#item-name").focus();
     } else {
         alert("Customer name, item name, and item price are required.");
     }
-}
+  }
 
-
+  // Remove item
   function removeItemFromCart() {
     var row = $(this).closest("tr");
-    var index = row.index(); // Find the index of the row to remove
+    var index = row.index();
 
-    if (index >= 0) {
-      var itemPrice = parseFloat(items[index].price);
-      var itemQty = parseInt(items[index].qty);
-
-      var itemTotal = itemPrice * itemQty;
-
+    if (index >= 0 && index < items.length) {
       items.splice(index, 1);
-
       row.remove();
-      localStorage.setItem("items", JSON. stringify(items));
+      localStorage.setItem("items", JSON.stringify(items));
       renderCart();
       updateTotalCost();
       updateTotalQty();
-      updateTotalAmt(); 
-
-      console.log(`Removed item: ${itemTotal} subtracted from total. `);
+      updateTotalAmt();
     }
   }
 
+  // Render small cart preview (table kept for editor simplicity)
   function renderCart() {
     $("#cart-table tbody").empty();
     items.forEach(function (item, index) {
@@ -124,340 +135,36 @@ $(document).ready(function () {
             </tr>`
         );
     });
-}
+  }
 
+  // Totals
   function updateTotalCost() {
-    var totalCost = 0;
-    items.forEach(function (item) {
-      totalCost += item.price * item.qty;
-    });
+    var totalCost = getTotalCost();
     $("#total-cost").text("Amount: ₹" + totalCost.toFixed(2));
   }
 
-  $("#prev-dues").on("input", function () {
-    prevDues = parseFloat($(this).val()) || 0;
-    updateTotalAmt();
-  });
-
-  $("#amount-paid").on("input", function () {
-    amountPaid = parseFloat($(this).val()) || 0;
-    updateCurrentDue();
-  });
-
-  // Function to update total amount
-  function updateTotalAmt() {
-    var totalAmt = 0;
-    items.forEach(function (item) {
-      totalAmt += item.price * item.qty;
-    });
-    totalAmt += prevDues;
-    $("#total-amount").text("TOTAL :  ₹" + totalAmt.toFixed(2));
-    updateCurrentDue();
-  }
-  function updateCurrentDue() {
-    var totalAmt = parseFloat($("#total-amount").text().split("₹")[1]) || 0;
-    var currentDue = totalAmt - amountPaid;
-    $("#current-due").text("Current Due: ₹" + currentDue.toFixed(2));
-  }
-
   function updateTotalQty() {
-    var totalQty = 0;
-    items.forEach(function (item) {
-      totalQty += item.qty;
-    });
+    var totalQty = getTotalQty();
     $("#total-qty").text("Total Qty: " + totalQty);
   }
 
-  var currentTime = new Date();
-  var hours = currentTime.getHours();
-  var minutes = currentTime. getMinutes();
-  var ampm = hours >= 12 ?  "PM" : "AM";
-  hours = hours % 12;
-  hours = hours ? hours :  12; // the hour '0' should be '12'
-  minutes = minutes < 10 ? "0" + minutes : minutes;
-  var timeStr = hours + ":" + minutes + " " + ampm;
-
-  function generateInvoice() {
-    var totalCost = getTotalCost();
-    var totalAmt = totalCost + prevDues;
-    var currentDue = totalAmt - amountPaid;
-    var totalQty = getTotalQty();
-
-    var currentTime = new Date();
-    var hours = currentTime.getHours();
-    var minutes = currentTime. getMinutes();
-    var ampm = hours >= 12 ?  "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // Convert 0 to 12 for 12-hour format
-    minutes = minutes < 10 ? "0" + minutes : minutes; // Add leading zero if needed
-    var timeStr = hours + ":" + minutes + " " + ampm;
-
-    
-  var invoice = `
-<html>
-  <head>
-    <title>Invoice</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-
-<style> 
-  @font-face {
-    font-family: "OCR-B";
-    src: url("https://fonts.cdnjs.com/ajax/libs/OCR-B/1.0/OCR-B.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
+  function updateTotalAmt() {
+    var totalAmt = getTotalCost() + (prevDues || 0);
+    $("#total-amount").text("TOTAL :  ₹" + totalAmt.toFixed(2));
+    updateCurrentDue();
   }
 
-  /* Apply OCR-B globally */
-  * {
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-    font-weight: normal ! important;
-    letter-spacing: 0.5px;
-    font-style: normal !important;
-  }
-  
-  body {
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-    font-size: 16px;
-    margin: 0;
-    background:  white;
-    font-weight: normal ! important;
-  }
-  
-  /* Print style for 80mm receipt */ 
-  @media print { 
-    @page { 
-      size: 100mm auto; 
-      margin: 0; 
-    } 
-    body { 
-      font-family: "OCR-B", "FreeMono", "Courier New", monospace !important; 
-      margin: 0; 
-      font-size: 16px;
-      font-weight: normal !important;
-    } 
-  } 
-  
-  .container { 
-    width: 100mm; 
-    margin: 0 auto;
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-  } 
-  
-  .shop-title { 
-    font-size: 18px ! important;  
-    font-weight: normal ! important; 
-    line-height: 0.5 !important; 
-    margin: 2mm 0 !important; 
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  } 
-  
-  .shop-address { 
-    line-height: 1.5 !important; 
-    margin:  2mm 0 !important; 
-    text-transform: uppercase;
-    font-size: 14px !important;
-    letter-spacing: 0.5px;
-  } 
-  
-  hr { 
-    margin: 0. 5mm 0 !important;
-    border: none !important;
-    border-top: 1px dotted #000 !important;
-  } 
-  
-  .item-list {
-    font-weight: normal !important; 
-    line-height: 1.0 !important; 
-    margin: 1mm 0 !important; 
-    text-transform: uppercase;
-    font-size: 16px !important;
-    letter-spacing: 0.5px;
-  } 
-  
-  .table {
-    line-height: 0.8 !important; 
-    margin-bottom: 0.3mm !important;
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-  } 
-  
-  th, td {
-    font-size: 16px !important;
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-    font-weight: normal !important;
-    letter-spacing: 0.5px;
-    padding: 2px 4px;
-  }
-  
-  p, h5 {
-    font-size: 16px !important;
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-    font-weight: normal !important;
-    letter-spacing: 0.5px;
-    margin: 0;
-    padding: 0;
+  function updateCurrentDue() {
+    var totalAmt = parseFloat($("#total-amount").text().split("₹")[1]) || 0;
+    var currentDue = totalAmt - (amountPaid || 0);
+    $("#current-due").text("Current Due: ₹" + currentDue.toFixed(2));
   }
 
-  .billing {
-    font-size: 16px !important;
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-  }
-
-  footer {
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-  }
-
-  .text-center {
-    font-family: "OCR-B", "FreeMono", "Courier New", monospace !important;
-  }
-
-  .text-right {
-    font-family:  "OCR-B", "FreeMono", "Courier New", monospace !important;
-  }
-</style>
-    
-    <!-- html2pdf script -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js" defer></script>
-  </head>
-  <body>
-    <div class="container mt-1">
-      <h3 class="shop-title text-center mb-0" id="savePdfButton">
-                <img src="Logopit_1763708107087.jpg" alt="logo" style="width: 320px; height: 70px; display: block; margin: 0 auto;" />
-      </h3>
-      
-
-      <hr class="shop-hr" style="border:  none; border-top: 1px dotted #000; width: 100%;" />
-
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <p class="mb-0"><strong>BILL TO:</strong> ${customerName}</p>
-        <p class="mb-0"><strong>NO. :</strong> ${customerNumber}</p>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <p class="mb-0"><strong>DATE:</strong> ${getCurrentDate()}</p>
-        <p class="text-right mb-0"><strong>TIME:</strong> ${timeStr}</p>
-      </div>
-      <hr style="border: none; border-top: 1px dotted #000; width: 100%; margin-bottom: 0px;" />
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th style="text-align: left;">S.N</th>
-            <th style="text-align: left;">DESCRIPTION</th>
-            <th style="text-align: right;">QTY</th>
-            <th style="text-align: right;">RATE</th>
-            <th style="text-align: right;">AMNT</th>
-          </tr>
-        </thead>
-        <tbody>`;
-      
-items.forEach(function (item, index) {
-  invoice += `<tr>
-                <td class="item-list" style="text-align: left;">${index + 1}</td>
-                <td class="item-list" style="text-align:  left;">${item.name}</td>
-                <td class="item-list" style="text-align: right;">${item.qty}</td>
-                <td class="item-list" style="text-align: right;">₹${item.price.toFixed(2)}</td>
-                <td class="item-list" style="text-align: right;">₹${(item.price * item.qty).toFixed(2)}</td>
-              </tr>`;
-});
-
-invoice += `
-        </tbody>
-      </table>
-      <footer>
-
-    <div class="billing" style="display: flex; justify-content: space-between; align-items: center;">
-      <p class="mb-0">TOT-QTY: <strong>${getTotalQty()}</strong></p>
-      <h5 class="text-right mb-0">TOTAL: <strong>₹ ${totalCost.toFixed(2)}</strong></h5>
-      </div>
-        <hr style="border: none; border-top: 1px dotted #000; width: 100%;" />
-        <h5 style="text-align: left;" class="mb-0">DUES: <span style="float: right;"> ₹${prevDues.toFixed(2)}</span></h5>
-        <h5 style="text-align: left;" class="mb-0">TOTAL AMT: <span style="float:  right;"> ₹${totalAmt.toFixed(2)}</span></h5>
-        <h5 style="text-align: left;" class="mb-0">CASH PAID: <span style="float: right;"> ₹${amountPaid.toFixed(2)}</span></h5>
-        <h5 style="text-align: left;" class="mb-0">CURR DUES: <span style="float: right;"> ₹${currentDue.toFixed(2)}</span></h5>
-
-        <hr style="border: none; border-top: 1px dotted #000; width: 100%;" />
-        <p id="print-button" class="text-center mb-0">THANKS FOR VISIT</p>
-        ${addStamp ?  `<div class="text-center" style="margin-top: 0;"><img src="Logopit_1750148360789.png" alt="Stamp" style="width: 120px;" transform:  rotate(-30deg); margin-top: 0;"></div>` : ""}
-      </footer>
-    </div>
-  </body>
-  <script>
-    // Trigger print when "THANKS FOR VISIT" is clicked
-    document.getElementById('print-button').addEventListener('click', function () {
-      window.print();
-    });
-
-    // Save as PDF using custom 80mm page size
-    function saveAsPDF() {
-      const element = document.body;
-      html2pdf(element, {
-    margin: 2, 
-    filename: 'invoice. pdf',
-    image: { type: 'jpeg', quality:  0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } // Use 'a4' to fit more content
-  });
-    }
-    // Event listener for the save as PDF button
-    document.getElementById('savePdfButton').addEventListener('click', saveAsPDF);
-  </script>
-</html>`;
-
-
-     var popup = window.open("", "_blank");
-    popup.document.open();
-    popup.document.write(invoice);
-    popup.document.close();
-  }
-  // Function to Generate WhatsApp Bill
-  function generateWhatsAppBill() {
-    if (!customerNumber) {
-      alert("Please provide a customer number to send the bill via WhatsApp.");
-      return;
-    }
-
-// Add country code (e.g., India:  91)
-const countryCode = "91"; // Change this to your country code
-const formattedNumber = `${countryCode}${customerNumber}`;
-      
-    var totalCost = getTotalCost();
-    var totalAmt = totalCost + prevDues;
-    var currentDue = totalAmt - amountPaid;
-    var totalQty = getTotalQty();
-
-const whatsappMessage = `Hi ${customerName},\n\nYour Invoice:\nTotal Qty: ${totalQty}\nTotal Amount: ₹${totalAmt.toFixed(2)}\nCurrent Due: ₹${currentDue.toFixed(2)}\n\nThank you for shopping with us! `;
-      
-
-   // 1. Try WhatsApp Business first
-const businessUrl = `whatsapp-business://send?phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
-const universalUrl = `https://api.whatsapp.com/send? phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
-
-// Open WhatsApp Business and fallback if it fails
-const newWindow = window.open(businessUrl, "_blank");
-
-// Check if the window is still open after a short delay (indicates failure)
-setTimeout(() => {
-  if (newWindow && ! newWindow.closed) {
-    newWindow.close(); // Close the blank tab
-    window.open(universalUrl, "_blank"); // Fallback to universal URL
-  }
-}, 500); // Adjust delay based on testing
-}
-  
-  function getCurrentDate() {
-    var currentDate = new Date();
-    var dd = String(currentDate.getDate()).padStart(2, "0");
-    var mm = String(currentDate.getMonth() + 1).padStart(2, "0"); // January is 0! 
-    var yyyy = currentDate. getFullYear();
-
-    return dd + "/" + mm + "/" + yyyy;
-  }
-
+  // Helpers
   function getTotalQty() {
     var totalQty = 0;
     items.forEach(function (item) {
-      totalQty += item. qty;
+      totalQty += Number(item.qty) || 0;
     });
     return totalQty;
   }
@@ -465,40 +172,218 @@ setTimeout(() => {
   function getTotalCost() {
     var totalCost = 0;
     items.forEach(function (item) {
-      totalCost += item.price * item.qty;
+      totalCost += (Number(item.price) || 0) * (Number(item.qty) || 0);
     });
     return totalCost;
   }
 
-  // Function to update customer name
-  $("#customer-name").on("input", function () {
-    customerName = $(this).val();
-  });
-  $("#customer-number").on("input", function () {
-    customerNumber = $(this).val();
-  });
-  
+  function getCurrentDate() {
+    var currentDate = new Date();
+    var dd = String(currentDate.getDate()).padStart(2, "0");
+    var mm = String(currentDate.getMonth() + 1).padStart(2, "0");
+    var yyyy = currentDate.getFullYear();
+    return dd + "/" + mm + "/" + yyyy;
+  }
 
-    function clearAllInputs() {
-        localStorage.clear();
-        items = [];
-        customerName = "";
-        customerNumber = "";
-        prevDues = 0;
-        amountPaid = 0;
+  function clearAllInputs() {
+    localStorage.clear();
+    items = [];
+    customerName = "";
+    customerNumber = "";
+    prevDues = 0;
+    amountPaid = 0;
 
-        $("#customer-name, #customer-number, #prev-dues, #amount-paid, #item-name, #item-price, #item-qty").val("");
-        $("#cart-table tbody").empty();
-        $("#total-cost").text("Amount:  ₹0.00");
-        $("#total-amount").text("TOTAL :  ₹0.00");
-        $("#current-due").text("Current Due: ₹0.00");
-        $("#total-qty").text("Total Qty: 0");
-        
-        // Optional: Force update localStorage
-        localStorage.setItem("items", JSON.stringify(items));
-        localStorage.setItem("customerName", customerName);
-        localStorage.setItem("customerNumber", customerNumber);
-        localStorage.setItem("prevDues", prevDues);
-        localStorage.setItem("amountPaid", amountPaid);
+    $("#customer-name, #customer-number, #prev-dues, #amount-paid, #item-name, #item-price, #item-qty").val("");
+    $("#cart-table tbody").empty();
+    $("#total-cost").text("Amount:  ₹0.00");
+    $("#total-amount").text("TOTAL :  ₹0.00");
+    $("#current-due").text("Current Due: ₹0.00");
+    $("#total-qty").text("Total Qty: 0");
+
+    localStorage.setItem("items", JSON.stringify(items));
+    localStorage.setItem("customerName", customerName);
+    localStorage.setItem("customerNumber", customerNumber);
+    localStorage.setItem("prevDues", prevDues);
+    localStorage.setItem("amountPaid", amountPaid);
+  }
+
+  // Escape HTML for safety inside invoice popup
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Generate invoice — single-column, not table-divided
+  function generateInvoice() {
+    var totalCost = getTotalCost();
+    var totalAmt = totalCost + (prevDues || 0);
+    var currentDue = totalAmt - (amountPaid || 0);
+    var totalQty = getTotalQty();
+
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var timeStr = hours + ":" + minutes + " " + ampm;
+
+    // Build invoice HTML: single column, each item as a single block line
+    var invoice = `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Invoice</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Google fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root { --receipt-font: 'Share Tech Mono', 'VT323', monospace; }
+    html,body { margin:0; padding:0; background:#fff; color:#000; }
+    body, .container, p, h1, h2, h3, h4 { font-family: var(--receipt-font) !important; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+    .container { width:100mm; margin:0 auto; padding:8px 10px; box-sizing:border-box; }
+    .shop-title { font-size:20px; text-align:center; text-transform:uppercase; letter-spacing:1.6px; font-weight:700; margin:0; }
+    .shop-sub { font-size:12.5px; text-align:center; margin:2px 0 6px 0; letter-spacing:0.8px; }
+    hr.sep { border:none; border-top:1px dotted #000; margin:6px 0; }
+    .meta { font-size:13px; margin:4px 0; display:flex; justify-content:space-between; align-items:center; }
+    .meta .left, .meta .right { width:48%; }
+    .items { margin-top:4px; }
+    .item { margin:6px 0; }
+    .item-top { display:flex; justify-content:space-between; align-items:baseline; }
+    .item-left { font-size:15px; letter-spacing:0.9px; text-transform:uppercase; }
+    .item-right { font-size:15px; font-weight:700; }
+    .item-meta { font-size:12.5px; color:#000; margin-top:2px; letter-spacing:0.8px; }
+    .totals { margin-top:6px; }
+    .tot-line { display:flex; justify-content:space-between; margin:4px 0; font-size:15px; letter-spacing:0.9px; }
+    .tot-line .label { text-transform:uppercase; }
+    .thank { text-align:center; margin-top:8px; font-size:13px; letter-spacing:1px; cursor:pointer; }
+    .stamp { text-align:center; margin-top:8px; }
+    /* Improve print rendering */
+    @media print {
+      @page { size: 100mm auto; margin:0; }
+      body { margin:0; }
     }
-}); 
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1 id="savePdfButton" class="shop-title">${escapeHtml((customerName && customerName.trim() !== "") ? customerName.toUpperCase() : "SHOP NAME")}</h1>
+    <div class="shop-sub">${escapeHtml((customerNumber && customerNumber.trim() !== "") ? ("Tel: " + customerNumber) : "Address / Phone")}</div>
+    <hr class="sep" />
+
+    <div class="meta">
+      <div class="left"><strong>BILL TO:</strong> ${escapeHtml(customerName || "")}</div>
+      <div class="right" style="text-align:right;"><strong>NO:</strong> ${escapeHtml(customerNumber || "")}</div>
+    </div>
+
+    <div class="meta">
+      <div class="left"><strong>DATE:</strong> ${getCurrentDate()}</div>
+      <div class="right" style="text-align:right;"><strong>TIME:</strong> ${timeStr}</div>
+    </div>
+
+    <hr class="sep" />
+
+    <div class="items">`;
+
+    // Items: single-column blocks
+    items.forEach(function(item, index) {
+      var amt = (Number(item.price) * Number(item.qty)).toFixed(2);
+      invoice += `
+      <div class="item">
+        <div class="item-top">
+          <div class="item-left">${index + 1}) ${escapeHtml(item.name)}</div>
+          <div class="item-right">₹${amt}</div>
+        </div>
+        <div class="item-meta">QTY: ${item.qty} &nbsp;&nbsp; RATE: ₹${Number(item.price).toFixed(2)} &nbsp;&nbsp; AMNT: ₹${amt}</div>
+      </div>`;
+    });
+
+    invoice += `
+    </div> <!-- items -->
+
+    <div class="totals">
+      <div class="tot-line"><div class="label">Tot-Qty</div><div class="value">${totalQty}</div></div>
+      <div class="tot-line"><div class="label">Total</div><div class="value">₹ ${totalCost.toFixed(2)}</div></div>
+      <div class="tot-line"><div class="label">Dues</div><div class="value">₹ ${ (prevDues || 0).toFixed(2) }</div></div>
+      <div class="tot-line"><div class="label">Total Amt</div><div class="value">₹ ${ totalAmt.toFixed(2) }</div></div>
+      <div class="tot-line"><div class="label">Cash Paid</div><div class="value">₹ ${ (amountPaid || 0).toFixed(2) }</div></div>
+      <div class="tot-line"><div class="label">Curr Dues</div><div class="value">₹ ${ currentDue.toFixed(2) }</div></div>
+    </div>
+
+    <hr class="sep" />
+    <div id="print-button" class="thank">THANKS FOR VISIT</div>
+    ${addStamp ? `<div class="stamp"><img src="Logopit_1750148360789.png" alt="Stamp" style="width:120px; transform: rotate(-6deg);"></div>` : ""}
+  </div>
+
+  <script>
+    // Print when THANKS clicked
+    document.getElementById('print-button').addEventListener('click', function() {
+      window.print();
+    });
+
+    // Save as PDF (hooked to top title)
+    function saveAsPDF() {
+      const element = document.body;
+      html2pdf(element, {
+        margin: 2,
+        filename: 'invoice.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      });
+    }
+
+    var saveBtn = document.getElementById('savePdfButton');
+    if (saveBtn) saveBtn.addEventListener('click', saveAsPDF);
+  </script>
+</body>
+</html>
+`;
+
+    // Open popup and write invoice
+    var popup = window.open("", "_blank");
+    popup.document.open();
+    popup.document.write(invoice);
+    popup.document.close();
+  }
+
+  // WhatsApp bill
+  function generateWhatsAppBill() {
+    if (!customerNumber) {
+      alert("Please provide a customer number to send the bill via WhatsApp.");
+      return;
+    }
+
+    // Country code (change if needed)
+    const countryCode = "91";
+    const formattedNumber = `${countryCode}${customerNumber}`;
+
+    var totalCost = getTotalCost();
+    var totalAmt = totalCost + (prevDues || 0);
+    var currentDue = totalAmt - (amountPaid || 0);
+    var totalQty = getTotalQty();
+
+    const whatsappMessage = `Hi ${customerName},\n\nYour Invoice:\nTotal Qty: ${totalQty}\nTotal Amount: ₹${totalAmt.toFixed(2)}\nCurrent Due: ₹${currentDue.toFixed(2)}\n\nThank you for shopping with us!`;
+
+    const businessUrl = `whatsapp-business://send?phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
+    const universalUrl = `https://api.whatsapp.com/send?phone=${formattedNumber}&text=${encodeURIComponent(whatsappMessage)}`;
+
+    const newWindow = window.open(businessUrl, "_blank");
+
+    setTimeout(() => {
+      if (newWindow && !newWindow.closed) {
+        newWindow.close();
+        window.open(universalUrl, "_blank");
+      }
+    }, 500);
+  }
+
+}); // end document ready
